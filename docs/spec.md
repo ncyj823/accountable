@@ -16,7 +16,7 @@ The intent left these open, or the design had a call to make. All twelve are set
 8. **Entries the app writes are read-only.** Stage changes write themselves into the timeline and cannot be edited or deleted, so it stays a true record of what happened. Notes, calls and emails are fully editable.
 9. **Each deal stores a board position.** Keeping a card where it was dropped needs it. It is never shown and never edited by hand.
 10. **Fonts and libraries ship with the app.** It has to work with no internet connection, so the three fonts are installed as packages and served from the app, and nothing is loaded from a CDN.
-11. **One close date does both jobs.** Expected while the deal is open, read as the actual one once it is won or lost, as the intent words it. The dashboard buckets won deals by it.
+11. **One close date does both jobs, and closing a deal fills it in.** Expected while the deal is open, read as the actual one once it is won or lost, as the intent words it. The dashboard buckets won deals by it, so a deal that reaches Won or Lost without one is given today's date. A closed deal that somehow still has none is counted from the moment it entered that stage.
 12. **Today comes from the computer running the backend.** Overdue follow-ups, the seven-day window and the twelve-month chart window all use that machine's local date.
 
 ## What we are building
@@ -114,7 +114,7 @@ A unique index on the lowercased email covers only rows where the email is neith
 | stage | text | New, Qualified, Proposal, Negotiation, Won or Lost |
 | value_cents | integer | defaults to 0 |
 | probability | integer | percent; set from the stage on every stage change |
-| close_date | date | expected while open, actual once won or lost |
+| close_date | date | expected while open, actual once won or lost; set to today when a deal is closed without one |
 | board_position | real | order within its column; never shown |
 | created_at, updated_at | datetime | |
 
@@ -147,6 +147,10 @@ Before anything is deleted the frontend asks `GET /api/{type}/{id}/impact`, whic
 **Expected revenue** of one deal is its value times its probability, divided by 100. Expected revenue of a set of deals is the sum of those amounts. Open pipeline totals, on the dashboard and on the board, count the four open stages only.
 
 **Stage changes write themselves.** Any change of stage, from the board or from the deal form, writes an activity on that deal: kind `stage_change`, description "Moved from Proposal to Negotiation", `happened_at` now, `written_by_app` true. It shows in the deal's timeline and in the dashboard's recent activity, and cannot be edited or deleted.
+
+**Closing a deal dates it.** A deal that reaches Won or Lost with no close date is given today's, whether it arrived there by a drag, by an edit, or by being added straight into that column. The date stays editable afterwards. A deal that leaves Won or Lost keeps whatever date it has, which is then read as the expected one again.
+
+Every figure that counts won deals by month — the charts, the funnel's twelve-month window and `won_this_month` — buckets by the close date. The rule above means a closed deal almost always has one. For a closed deal that still does not, because it was written around the app, the figure uses the moment it entered that stage, which its stage-change entry records, and the moment it was created if it has no such entry. Nothing is ever left out of the totals.
 
 **Late deals.** A deal is late when its stage is one of the four open ones and its close date is before today. Late deals are marked in the deals table and on their pipeline card.
 
@@ -183,7 +187,7 @@ The board drop sends neighbours rather than a number, so the backend owns the po
 
 ### The dashboard response
 
-- `months`: twelve entries, oldest first, ending with the current month. Each has the month, the number of deals won and the revenue won, taken from deals in the Won stage bucketed by their close date.
+- `months`: twelve entries, oldest first, ending with the current month. Each has the month, the number of deals won and the revenue won, taken from deals in the Won stage bucketed by their close date, falling back as the closing rule says when one is missing.
 - `open_pipeline`: the count, total value and expected revenue of the deals in the four open stages.
 - `won_this_month`: the count and revenue for the current month, for the tiles.
 - `funnel`: five bands, New through Won. Each band is the total value of deals that have reached that stage: deals at that stage or further along, with won deals in every band and lost deals in none. Open deals count whatever their age; won deals count only from the last twelve months.
