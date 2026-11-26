@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accountable — Mockup C, Operator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sea-green:#06D6A0; --marigold:#FFC145; --coral:#F78C6B;
+    --cerulean:#118AB2; --raspberry:#EF476F;
+    --midnight:#073B4C; --sea-mist:#CDD8DB;
+    --page:#F0F4F5; --panel:#FFFFFF;
+    --sea-green-text:#04815F; --marigold-text:#946200; --coral-text:#A6411C;
+    --cerulean-text:#0D6E8E; --raspberry-text:#C21E45;
+    --ink:#073B4C; --ink-muted:#5A7580;
+    --r-panel:16px; --r-control:10px;
+    --shadow:0 1px 2px rgba(7,59,76,.06), 0 8px 24px rgba(7,59,76,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Instrument Sans',system-ui,sans-serif;background:var(--page);color:var(--ink);
+    font-size:13px;line-height:1.4;-webkit-font-smoothing:antialiased}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  .serif{font-family:'Instrument Serif',Georgia,serif;font-weight:400}
+  .shell{display:flex;gap:20px;padding:20px;min-height:100vh}
+
+  /* Dark sidebar, Sea Mist ink on Midnight */
+  .sidebar{width:212px;flex:0 0 212px;background:var(--midnight);border-radius:var(--r-panel);
+    box-shadow:var(--shadow);padding:20px 12px;height:fit-content;position:sticky;top:20px;color:var(--sea-mist)}
+  .wordmark{display:flex;align-items:center;gap:9px;padding:0 8px 20px}
+  .mark{width:26px;height:26px;border-radius:8px;background:var(--sea-green);display:grid;
+    place-items:center;color:var(--midnight);font-weight:700;font-size:14px}
+  .wordmark b{font-size:16px;font-weight:600;color:#fff;letter-spacing:-.01em}
+  .navlabel{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+    color:rgba(205,216,219,.55);padding:0 12px 8px}
+  nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;
+    color:var(--sea-mist);text-decoration:none;font-weight:500;margin-bottom:1px;font-size:13px}
+  nav a:hover{background:rgba(205,216,219,.12)}
+  nav a.on{background:var(--sea-green);color:var(--midnight);font-weight:600}
+  nav .ico{width:15px;height:15px;flex:0 0 15px}
+  .sidefoot{margin-top:22px;padding:12px;border-radius:10px;background:rgba(205,216,219,.1)}
+  .sidefoot span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.07em;
+    color:rgba(205,216,219,.6);font-weight:600}
+  .sidefoot b{font-size:16px;font-weight:500;color:#fff}
+
+  .main{flex:1;min-width:0}
+  .bar{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+  h1{font-size:24px;font-weight:600;letter-spacing:-.02em}
+  .bar .when{font-size:12px;color:var(--ink-muted)}
+  .spacer{flex:1}
+  .btn{height:32px;padding:0 14px;border:0;border-radius:var(--r-control);font-family:inherit;
+    font-size:13px;font-weight:600;cursor:pointer}
+  .btn-primary{background:var(--sea-green);color:var(--midnight)}
+  .btn-secondary{background:var(--sea-mist);color:var(--midnight)}
+
+  .panel{background:var(--panel);border-radius:var(--r-panel);box-shadow:var(--shadow);padding:16px 18px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+  .c12{grid-column:span 12}.c6{grid-column:span 6}.c4{grid-column:span 4}.c5{grid-column:span 5}.c3{grid-column:span 3}
+  .top{align-self:start}
+  .label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-muted)}
+  h2{font-size:15px;font-weight:600}
+  .phead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+  .phead .sub{font-size:11px;color:var(--ink-muted)}
+
+  /* Metric strip: one panel, four cells */
+  .strip{display:flex;padding:0}
+  .strip > div{flex:1;padding:16px 20px}
+  .strip > div + div{box-shadow:inset 1px 0 0 rgba(205,216,219,.75)}
+  .strip .fig{font-size:24px;font-weight:500;letter-spacing:-.01em;margin:6px 0 2px}
+  .strip .note{font-size:11px;color:var(--ink-muted)}
+  .pos{color:var(--sea-green-text);font-weight:600}
+  .neg{color:var(--raspberry-text);font-weight:600}
+
+  /* lists */
+  .row{display:flex;align-items:center;gap:10px;padding:7px 0}
+  .row + .row{border-top:1px solid rgba(205,216,219,.55)}
+  .tick{width:16px;height:16px;flex:0 0 16px;border-radius:5px;background:var(--sea-mist)}
+  .row .t{flex:1;min-width:0}
+  .row .t b{font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+  .row .t span{font-size:11px;color:var(--ink-muted)}
+  .due{font-size:11px;font-weight:500;white-space:nowrap}
+  .overdue{color:var(--raspberry-text)}
+  .dot{width:5px;height:5px;border-radius:50%;background:var(--raspberry);display:inline-block;margin-right:5px}
+  .d{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+
+  /* Pipeline */
+  .board{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:start}
+  .col{background:var(--panel);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .col .stripe{height:3px}
+  .ch{padding:11px 12px 10px}
+  .ch .n{display:flex;align-items:center;justify-content:space-between}
+  .ch .n b{font-size:13px;font-weight:600}
+  .ch .n i{font-style:normal;font-size:11px;font-weight:600;color:var(--ink-muted);
+    background:var(--page);border-radius:999px;padding:1px 7px}
+  .ch .f{margin-top:5px;display:flex;align-items:baseline;gap:8px}
+  .ch .f b{font-size:13px;font-weight:500}
+  .ch .f em{font-style:normal;font-size:10px;color:var(--ink-muted)}
+  .cards{padding:0 8px 10px;display:flex;flex-direction:column;gap:6px}
+  .card{background:var(--page);border-radius:10px;padding:9px 10px}
+  .card b{display:block;font-size:12px;font-weight:600;line-height:1.25}
+  .card .org{font-size:10px;color:var(--ink-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:7px}
+  .card .val{font-size:12px;font-weight:500}
+  .card .pct{font-size:10px;font-weight:600;border-radius:999px;padding:1px 6px}
+  .card .dt{font-size:10px;color:var(--ink-muted);margin-top:4px;display:block}
+  .more{text-align:center;font-size:11px;color:var(--ink-muted);padding:3px 0}
+  .gap{height:32px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="wordmark"><div class="mark">A</div><b>Accountable</b></div>
+    <div class="navlabel">Workspace</div>
+    <nav>
+      <a class="on" href="#"><svg class="ico" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>Dashboard</a>
+      <a href="#"><svg class="ico" viewBox="0 0 16 16" fill="currentColor"><path d="M2 14V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v11H2Zm9 0V7h2a1 1 0 0 1 1 1v6h-3ZM4 5h3v1.5H4V5Zm0 3h3v1.5H4V8Z"/></svg>Organizations</a>
+      <a href="#"><svg class="ico" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="3"/><path d="M2 14a6 6 0 0 1 12 0H2Z"/></svg>Contacts</a>
+      <a href="#"><svg class="ico" viewBox="0 0 16 16" fill="currentColor"><path d="M2 5h12v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5Zm4-3h4a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Z"/></svg>Deals</a>
+      <a href="#"><svg class="ico" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="4" height="12" rx="1"/><rect x="6" y="2" width="4" height="8" rx="1"/><rect x="11" y="2" width="4" height="5" rx="1"/></svg>Pipeline</a>
+    </nav>
+    <div class="sidefoot">
+      <span>Open pipeline</span>
+      <b class="mono">$486,500</b>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- ======================= DASHBOARD ======================= -->
+    <div class="bar">
+      <h1>Dashboard</h1>
+      <div class="when mono">Thursday 26 November 2026</div>
+      <div class="spacer"></div>
+      <button class="btn btn-secondary">Log activity</button>
+      <button class="btn btn-primary">New deal</button>
+    </div>
+
+    <div class="grid">
+      <section class="panel c12 strip" style="padding:0">
+        <div><div class="label">Open pipeline</div><div class="fig mono">$486,500</div>
+          <div class="note">18 deals, four open stages</div></div>
+        <div><div class="label">Expected revenue</div><div class="fig mono">$184,175</div>
+          <div class="note">37.9% of open value</div></div>
+        <div><div class="label">Won this month</div><div class="fig mono">4</div>
+          <div class="note"><span class="pos">+2</span> on October</div></div>
+        <div><div class="label">Revenue this month</div><div class="fig mono">$92,000</div>
+          <div class="note"><span class="pos">+4.5%</span> on October</div></div>
+        <div><div class="label">Overdue follow-ups</div><div class="fig mono">2</div>
+          <div class="note"><span class="neg">Oldest 5 days</span></div></div>
+      </section>
+
+      <!-- Revenue line -->
+      <section class="panel c6">
+        <div class="phead"><h2>Revenue won by month</h2><div class="sub mono">Dec 2025 — Nov 2026 · $900,500</div></div>
+        <svg viewBox="0 0 620 240" width="100%" height="235" role="img" aria-label="Revenue won by month">
+          <g stroke="rgba(205,216,219,.75)" stroke-width="1">
+            <line x1="44" y1="210" x2="612" y2="210"/><line x1="44" y1="161.5" x2="612" y2="161.5"/>
+            <line x1="44" y1="113" x2="612" y2="113"/><line x1="44" y1="64.5" x2="612" y2="64.5"/>
+            <line x1="44" y1="16" x2="612" y2="16"/>
+          </g>
+          <g font-family="JetBrains Mono" font-size="10" fill="#5A7580" text-anchor="end">
+            <text x="36" y="214">0</text><text x="36" y="165.5">28k</text><text x="36" y="117">55k</text>
+            <text x="36" y="68.5">83k</text><text x="36" y="20">110k</text>
+          </g>
+          <path d="M44,102.4 L95.1,125.3 L146.2,82.1 L197.3,113 L248.4,63.6 L299.5,87.4 L350.5,44.2 L401.6,107.7 L452.7,30.1 L503.8,73.3 L554.9,54.8 L606,47.7 L606,210 L44,210 Z" fill="#06D6A0" fill-opacity=".12"/>
+          <polyline points="44,102.4 95.1,125.3 146.2,82.1 197.3,113 248.4,63.6 299.5,87.4 350.5,44.2 401.6,107.7 452.7,30.1 503.8,73.3 554.9,54.8 606,47.7" fill="none" stroke="#06D6A0" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <g fill="#06D6A0">
+            <circle cx="44" cy="102.4" r="2.5"/><circle cx="95.1" cy="125.3" r="2.5"/><circle cx="146.2" cy="82.1" r="2.5"/>
+            <circle cx="197.3" cy="113" r="2.5"/><circle cx="248.4" cy="63.6" r="2.5"/><circle cx="299.5" cy="87.4" r="2.5"/>
+            <circle cx="350.5" cy="44.2" r="2.5"/><circle cx="401.6" cy="107.7" r="2.5"/><circle cx="452.7" cy="30.1" r="2.5"/>
+            <circle cx="503.8" cy="73.3" r="2.5"/><circle cx="554.9" cy="54.8" r="2.5"/>
+          </g>
+          <circle cx="606" cy="47.7" r="5" fill="#06D6A0"/><circle cx="606" cy="47.7" r="2" fill="#fff"/>
+          <g font-family="JetBrains Mono" font-size="10" fill="#5A7580" text-anchor="middle">
+            <text x="44" y="230">Dec</text><text x="95.1" y="230">Jan</text><text x="146.2" y="230">Feb</text>
+            <text x="197.3" y="230">Mar</text><text x="248.4" y="230">Apr</text><text x="299.5" y="230">May</text>
+            <text x="350.5" y="230">Jun</text><text x="401.6" y="230">Jul</text><text x="452.7" y="230">Aug</text>
+            <text x="503.8" y="230">Sep</text><text x="554.9" y="230">Oct</text><text x="606" y="230">Nov</text>
+          </g>
+        </svg>
+      </section>
+
+      <!-- Deals won bars -->
+      <section class="panel c6">
+        <div class="phead"><h2>Deals won by month</h2><div class="sub mono">45 in twelve months</div></div>
+        <svg viewBox="0 0 620 240" width="100%" height="235" role="img" aria-label="Deals won by month">
+          <g stroke="rgba(205,216,219,.75)" stroke-width="1">
+            <line x1="34" y1="210" x2="612" y2="210"/><line x1="34" y1="154.6" x2="612" y2="154.6"/>
+            <line x1="34" y1="99.1" x2="612" y2="99.1"/><line x1="34" y1="43.7" x2="612" y2="43.7"/>
+          </g>
+          <g font-family="JetBrains Mono" font-size="10" fill="#5A7580" text-anchor="end">
+            <text x="26" y="214">0</text><text x="26" y="158.6">2</text><text x="26" y="103.1">4</text><text x="26" y="47.7">6</text>
+          </g>
+          <g fill="#FFC145">
+            <rect x="45" y="126.9" width="26" height="83.1" rx="5"/>
+            <rect x="92.7" y="154.6" width="26" height="55.4" rx="5"/>
+            <rect x="140.3" y="99.1" width="26" height="110.9" rx="5"/>
+            <rect x="188" y="126.9" width="26" height="83.1" rx="5"/>
+            <rect x="235.7" y="71.4" width="26" height="138.6" rx="5"/>
+            <rect x="283.3" y="126.9" width="26" height="83.1" rx="5"/>
+            <rect x="331" y="43.7" width="26" height="166.3" rx="5"/>
+            <rect x="378.7" y="154.6" width="26" height="55.4" rx="5"/>
+            <rect x="426.3" y="71.4" width="26" height="138.6" rx="5"/>
+            <rect x="474" y="99.1" width="26" height="110.9" rx="5"/>
+            <rect x="521.7" y="99.1" width="26" height="110.9" rx="5"/>
+            <rect x="569.3" y="99.1" width="26" height="110.9" rx="5"/>
+          </g>
+          <g font-family="JetBrains Mono" font-size="10" fill="#5A7580" text-anchor="middle">
+            <text x="58" y="230">Dec</text><text x="105.7" y="230">Jan</text><text x="153.3" y="230">Feb</text>
+            <text x="201" y="230">Mar</text><text x="248.7" y="230">Apr</text><text x="296.3" y="230">May</text>
+            <text x="344" y="230">Jun</text><text x="391.7" y="230">Jul</text><text x="439.3" y="230">Aug</text>
+            <text x="487" y="230">Sep</text><text x="534.7" y="230">Oct</text><text x="582.3" y="230">Nov</text>
+          </g>
+        </svg>
+      </section>
+
+      <!-- Funnel -->
+      <section class="panel c4 top">
+        <div class="phead"><h2>Funnel</h2><div class="sub">Reached each stage</div></div>
+        <svg viewBox="0 0 400 190" width="100%" height="190" role="img" aria-label="Sales funnel by stage">
+          <g font-family="Instrument Sans" font-size="11" font-weight="600" fill="#073B4C" text-anchor="end">
+            <text x="82" y="27">New</text><text x="82" y="62">Qualified</text><text x="82" y="97">Proposal</text>
+            <text x="82" y="132">Negotiation</text><text x="82" y="167">Won</text>
+          </g>
+          <rect x="90" y="10" width="300" height="26" rx="7" fill="#CDD8DB"/>
+          <rect x="90" y="45" width="253.1" height="26" rx="7" fill="#118AB2"/>
+          <rect x="90" y="80" width="196.4" height="26" rx="7" fill="#FFC145"/>
+          <rect x="90" y="115" width="144.4" height="26" rx="7" fill="#F78C6B"/>
+          <rect x="90" y="150" width="106.6" height="26" rx="7" fill="#06D6A0"/>
+          <g font-family="JetBrains Mono" font-size="11" font-weight="500">
+            <text x="380" y="27" fill="#073B4C" text-anchor="end">$754.5k</text>
+            <text x="333" y="62" fill="#FFFFFF" text-anchor="end">$636.5k</text>
+            <text x="276" y="97" fill="#073B4C" text-anchor="end">$494k</text>
+            <text x="224" y="132" fill="#073B4C" text-anchor="end">$363k</text>
+            <text x="186" y="167" fill="#073B4C" text-anchor="end">$268k</text>
+          </g>
+        </svg>
+      </section>
+
+      <!-- Follow-ups -->
+      <section class="panel c4">
+        <div class="phead"><h2>Follow-ups</h2><div class="sub"><span class="overdue">2 overdue</span> · next 7 days</div></div>
+        <div class="row"><div class="tick"></div><div class="t"><b>Call Sam Idowu about Brightline Legal</b><span>Brightline Legal</span></div><div class="due overdue mono"><span class="dot"></span>21 Nov</div></div>
+        <div class="row"><div class="tick"></div><div class="t"><b>Send Castleford the security pack</b><span>Castleford Group — 40 seats</span></div><div class="due overdue mono"><span class="dot"></span>24 Nov</div></div>
+        <div class="row"><div class="tick"></div><div class="t"><b>Check in with Grace Lowe</b><span>Meridian Health — site licence</span></div><div class="due mono">27 Nov</div></div>
+        <div class="row"><div class="tick"></div><div class="t"><b>Chase the Pentland Rail PO</b><span>Pentland Rail</span></div><div class="due mono">30 Nov</div></div>
+        <div class="row"><div class="tick"></div><div class="t"><b>Renewal call, Oakmont Dental</b><span>Oakmont Dental</span></div><div class="due mono">02 Dec</div></div>
+      </section>
+
+      <!-- Activity -->
+      <section class="panel c4">
+        <div class="phead"><h2>Recent activity</h2><div class="sub">Newest first</div></div>
+        <div class="row"><div class="d" style="background:var(--sea-green)"></div><div class="t"><b>Moved Qualified to Proposal</b><span>Northwind Trading renewal</span></div><div class="due mono">2h</div></div>
+        <div class="row"><div class="d" style="background:var(--cerulean)"></div><div class="t"><b>Call about site licence terms</b><span>Meridian Health · Grace Lowe</span></div><div class="due mono">09:40</div></div>
+        <div class="row"><div class="d" style="background:var(--marigold)"></div><div class="t"><b>Emailed the revised proposal</b><span>Northwind Trading · Dara Finch</span></div><div class="due mono">Yest.</div></div>
+        <div class="row"><div class="d" style="background:var(--sea-mist)"></div><div class="t"><b>Budget moved to next quarter</b><span>Brightline Legal</span></div><div class="due mono">Yest.</div></div>
+        <div class="row"><div class="d" style="background:var(--sea-green)"></div><div class="t"><b>Moved Negotiation to Won</b><span>Fenwick &amp; Co</span></div><div class="due mono">12 Nov</div></div>
+      </section>
+    </div>
+
+    <div class="gap"></div>
+
+    <!-- ======================= PIPELINE ======================= -->
+    <div class="bar">
+      <h1>Pipeline</h1>
+      <div class="when mono">18 open · $486,500 · expected $184,175</div>
+      <div class="spacer"></div>
+      <button class="btn btn-secondary">Filter</button>
+      <button class="btn btn-primary">New deal</button>
+    </div>
+
+    <div class="board">
+      <!-- New -->
+      <div class="col">
+        <div class="stripe" style="background:var(--sea-mist)"></div>
+        <div class="ch"><div class="n"><b>New</b><i>6</i></div>
+          <div class="f"><b class="mono">$118,000</b><em class="mono">exp $11,800</em></div></div>
+        <div class="cards">
+          <div class="card"><b>Alpine Dental — 12 seats</b><div class="org">Alpine Dental · Rosa Keane</div>
+            <div class="foot"><span class="val mono">$18,000</span><span class="pct mono" style="background:var(--sea-mist);color:var(--midnight)">10%</span></div>
+            <span class="dt mono">14 Jan 2027</span></div>
+          <div class="card"><b>Harbour Freight pilot</b><div class="org">Harbour Freight · Tom Abara</div>
+            <div class="foot"><span class="val mono">$24,000</span><span class="pct mono" style="background:var(--sea-mist);color:var(--midnight)">10%</span></div>
+            <span class="dt mono">22 Dec 2026</span></div>
+          <div class="card"><b>Varner Logistics — fleet</b><div class="org">Varner Logistics · Priya Raman</div>
+            <div class="foot"><span class="val mono">$31,000</span><span class="pct mono" style="background:var(--sea-mist);color:var(--midnight)">10%</span></div>
+            <span class="dt mono">09 Feb 2027</span></div>
+          <div class="card"><b>Thornley Build — survey</b><div class="org">Thornley Build · Kit Danso</div>
+            <div class="foot"><span class="val mono">$17,500</span><span class="pct mono" style="background:var(--sea-mist);color:var(--midnight)">10%</span></div>
+            <span class="dt mono">27 Jan 2027</span></div>
+          <div class="more">2 more</div>
+        </div>
+      </div>
+      <!-- Qualified -->
+      <div class="col">
+        <div class="stripe" style="background:var(--cerulean)"></div>
+        <div class="ch"><div class="n"><b>Qualified</b><i>5</i></div>
+          <div class="f"><b class="mono">$142,500</b><em class="mono">exp $35,625</em></div></div>
+        <div class="cards">
+          <div class="card"><b>Dunmore Clinics rollout</b><div class="org">Dunmore Clinics · Ana Mellor</div>
+            <div class="foot"><span class="val mono">$46,000</span><span class="pct mono" style="background:rgba(17,138,178,.15);color:var(--cerulean-text)">25%</span></div>
+            <span class="dt mono">18 Dec 2026</span></div>
+          <div class="card"><b>Kestrel Foods — depot scan</b><div class="org">Kestrel Foods · Will Osei</div>
+            <div class="foot"><span class="val mono">$37,500</span><span class="pct mono" style="background:rgba(17,138,178,.15);color:var(--cerulean-text)">25%</span></div>
+            <span class="dt mono">05 Jan 2027</span></div>
+          <div class="card"><b>Brightline Legal</b><div class="org">Brightline Legal · Sam Idowu</div>
+            <div class="foot"><span class="val mono">$29,000</span><span class="pct mono" style="background:rgba(17,138,178,.15);color:var(--cerulean-text)">25%</span></div>
+            <span class="dt mono overdue"><span class="dot"></span>11 Nov 2026</span></div>
+          <div class="card"><b>Ellis &amp; Vane</b><div class="org">Ellis &amp; Vane · Nadia Sorrel</div>
+            <div class="foot"><span class="val mono">$18,000</span><span class="pct mono" style="background:rgba(17,138,178,.15);color:var(--cerulean-text)">25%</span></div>
+            <span class="dt mono">21 Jan 2027</span></div>
+          <div class="more">1 more</div>
+        </div>
+      </div>
+      <!-- Proposal -->
+      <div class="col">
+        <div class="stripe" style="background:var(--marigold)"></div>
+        <div class="ch"><div class="n"><b>Proposal</b><i>4</i></div>
+          <div class="f"><b class="mono">$131,000</b><em class="mono">exp $65,500</em></div></div>
+        <div class="cards">
+          <div class="card"><b>Northwind Trading renewal</b><div class="org">Northwind Trading · Dara Finch</div>
+            <div class="foot"><span class="val mono">$52,000</span><span class="pct mono" style="background:rgba(255,193,69,.3);color:var(--marigold-text)">50%</span></div>
+            <span class="dt mono">30 Nov 2026</span></div>
+          <div class="card"><b>Castleford Group — 40 seats</b><div class="org">Castleford Group · Ivy Marchetti</div>
+            <div class="foot"><span class="val mono">$44,000</span><span class="pct mono" style="background:rgba(255,193,69,.3);color:var(--marigold-text)">50%</span></div>
+            <span class="dt mono">15 Dec 2026</span></div>
+          <div class="card"><b>Pentland Rail</b><div class="org">Pentland Rail · Omar Seif</div>
+            <div class="foot"><span class="val mono">$21,000</span><span class="pct mono" style="background:rgba(255,193,69,.3);color:var(--marigold-text)">50%</span></div>
+            <span class="dt mono overdue"><span class="dot"></span>02 Nov 2026</span></div>
+          <div class="card"><b>Marlow Analytics</b><div class="org">Marlow Analytics · Hana Fitz</div>
+            <div class="foot"><span class="val mono">$14,000</span><span class="pct mono" style="background:rgba(255,193,69,.3);color:var(--marigold-text)">50%</span></div>
+            <span class="dt mono">09 Dec 2026</span></div>
+        </div>
+      </div>
+      <!-- Negotiation -->
+      <div class="col">
+        <div class="stripe" style="background:var(--coral)"></div>
+        <div class="ch"><div class="n"><b>Negotiation</b><i>3</i></div>
+          <div class="f"><b class="mono">$95,000</b><em class="mono">exp $71,250</em></div></div>
+        <div class="cards">
+          <div class="card"><b>Meridian Health — site licence</b><div class="org">Meridian Health · Grace Lowe</div>
+            <div class="foot"><span class="val mono">$48,000</span><span class="pct mono" style="background:rgba(247,140,107,.3);color:var(--coral-text)">75%</span></div>
+            <span class="dt mono">04 Dec 2026</span></div>
+          <div class="card"><b>Ardent Partners</b><div class="org">Ardent Partners · Jonah Bell</div>
+            <div class="foot"><span class="val mono">$27,000</span><span class="pct mono" style="background:rgba(247,140,107,.3);color:var(--coral-text)">75%</span></div>
+            <span class="dt mono">28 Nov 2026</span></div>
+          <div class="card"><b>Silverbeck Mills</b><div class="org">Silverbeck Mills · Lena Hart</div>
+            <div class="foot"><span class="val mono">$20,000</span><span class="pct mono" style="background:rgba(247,140,107,.3);color:var(--coral-text)">75%</span></div>
+            <span class="dt mono">19 Dec 2026</span></div>
+        </div>
+      </div>
+      <!-- Won -->
+      <div class="col">
+        <div class="stripe" style="background:var(--sea-green)"></div>
+        <div class="ch"><div class="n"><b>Won</b><i>4</i></div>
+          <div class="f"><b class="mono">$92,000</b><em>this month</em></div></div>
+        <div class="cards">
+          <div class="card"><b>Fenwick &amp; Co</b><div class="org">Fenwick &amp; Co · Mara Quist</div>
+            <div class="foot"><span class="val mono">$38,000</span><span class="pct mono" style="background:rgba(6,214,160,.25);color:var(--sea-green-text)">100%</span></div>
+            <span class="dt mono">12 Nov 2026</span></div>
+          <div class="card"><b>Oakmont Dental</b><div class="org">Oakmont Dental · Yusuf Adeyemi</div>
+            <div class="foot"><span class="val mono">$22,000</span><span class="pct mono" style="background:rgba(6,214,160,.25);color:var(--sea-green-text)">100%</span></div>
+            <span class="dt mono">06 Nov 2026</span></div>
+          <div class="card"><b>Halloway Print</b><div class="org">Halloway Print · Esme Tait</div>
+            <div class="foot"><span class="val mono">$19,000</span><span class="pct mono" style="background:rgba(6,214,160,.25);color:var(--sea-green-text)">100%</span></div>
+            <span class="dt mono">19 Nov 2026</span></div>
+          <div class="more">1 more</div>
+        </div>
+      </div>
+      <!-- Lost -->
+      <div class="col">
+        <div class="stripe" style="background:var(--raspberry)"></div>
+        <div class="ch"><div class="n"><b>Lost</b><i>2</i></div>
+          <div class="f"><b class="mono">$34,000</b><em>this month</em></div></div>
+        <div class="cards">
+          <div class="card"><b>Rivergate Media</b><div class="org">Rivergate Media · Cleo Nkemdirim</div>
+            <div class="foot"><span class="val mono">$19,000</span><span class="pct mono" style="background:rgba(239,71,111,.18);color:var(--raspberry-text)">0%</span></div>
+            <span class="dt mono">03 Nov 2026</span></div>
+          <div class="card"><b>Tollgate Services</b><div class="org">Tollgate Services · Ben Ruiz</div>
+            <div class="foot"><span class="val mono">$15,000</span><span class="pct mono" style="background:rgba(239,71,111,.18);color:var(--raspberry-text)">0%</span></div>
+            <span class="dt mono">28 Oct 2026</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
